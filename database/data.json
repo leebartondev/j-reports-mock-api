@@ -1,0 +1,13 @@
+{
+  "datasources": {
+    "data": [
+      {
+        "id": 1,
+        "name": "New datasource",
+        "connection_string": "http://localhost:5000/",
+        "username": "myUsername",
+        "password": "myPassword1"
+      }
+    ]
+  }
+}
