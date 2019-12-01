@@ -1,12 +1,25 @@
 {
-  "datasources": {
+  "users": {
     "data": [
       {
         "id": 1,
-        "name": "New datasource",
-        "connection_string": "http://localhost:5000/",
-        "username": "myUsername",
-        "password": "myPassword1"
+        "username": "user1",
+        "groups": ["Utility", "Transportation"],
+        "permission": 0
+      },
+
+      {
+        "id": 2,
+        "username": "user2",
+        "groups": ["Transportation", "Security"],
+        "permission": 1
+      },
+
+      {
+        "id": 3,
+        "username": "user3",
+        "groups": ["IT", "Security"],
+        "permission": 2
       }
     ]
   }
