@@ -36,6 +36,15 @@ const getUserIndexById = (database, id) => {
   }
 }
 
+const getGroupIndexById = (database, id) => {
+  // Get index of object by id
+  for (let i = 0; i < database.groups.data.length; i++) {
+    if (Number(database.groups.data[i].id) === Number(id)) {
+      return i
+    }
+  }
+}
+
 // Get fake datasource data
 const getDatasourceData = body => {
   return {
@@ -99,6 +108,18 @@ module.exports = app => {
       }
   })
 
+   // GET all groups
+   app.get('/rest/groups',
+   (req, res) => {
+     // Get fake data - datasources
+     let fakeDatabase = getFakeDatabase()
+     // Send fake data
+     if (TEST_ERROR) {
+       setTimeout(() => res.status(404).send('Not Found'), 2000)
+     } else {
+       setTimeout(() => res.status(200).send(fakeDatabase.users), 1500)
+     }
+ })
 
   /// /////////////////
   // P O S T
@@ -169,6 +190,39 @@ module.exports = app => {
               res.status(404).send('Not Found')
             } else {
               res.status(200).send(JSON.stringify({data: datasourceObject}))
+            }
+          }
+        }
+      )
+  })
+
+  // POST a datasource
+  app.post('/rest/groups',
+    (req, res) => {
+      // Get data to add to
+      let fakeDatabase = getFakeDatabase()
+      let id = 1
+      if (fakeDatabase.groups.data.length > 0) {
+        id = fakeDatabase.groups.data[fakeDatabase.groups.data.length - 1].id + 1
+      }
+      // Create datasource object
+      let groupObject = {
+        id: id,
+        name: req.body.name
+      }
+      // Write to mock database
+      fakeDatabase.datasources.data.push(groupObject)
+      fs.writeFile(
+        path.resolve(__dirname, '../database/data.json'),
+        JSON.stringify(fakeDatabase),
+        (err) => {
+          if (err) {
+            res.status(500).send('Error writing to database')
+          } else {
+            if (TEST_ERROR) {
+              res.status(404).send('Not Found')
+            } else {
+              res.status(200).send(JSON.stringify({data: groupObject}))
             }
           }
         }
@@ -298,6 +352,35 @@ module.exports = app => {
       )
     })
 
+    // Update a group
+  app.put('/rest/groups/:id',
+  (req, res) => {
+    // Get param
+    let id = req.params.id
+    // Get database
+    let fakeDatabase = getFakeDatabase()
+    // Get index of object by id
+    let index = getDatasourceIndexById(fakeDatabase, id)
+    // update object
+    fakeDatabase.groups.data[index].name = req.body.name ? req.body.name : fakeDatabase.groups.data[index].name
+    // Write to database
+    fs.writeFile(
+      path.resolve(__dirname, '../database/data.json'),
+      JSON.stringify(fakeDatabase),
+      (err) => {
+        if (err) {
+          res.status(500).send('Error writing to database')
+        } else {
+          if (TEST_ERROR) {
+            res.status(404).send('Not Found')
+          } else {
+            res.status(200).send(JSON.stringify({data: fakeDatabase.groups.data[index]}))
+          }
+        }
+      }
+    )
+  })
+
   // Update a report
   app.put('/rest/reports/:id',
     (req, res) => {
@@ -397,6 +480,38 @@ module.exports = app => {
         }
       )
     })
+
+  // Delete a group
+  app.delete('/rest/groups/:id',
+  (req, res) => {
+    // Get param
+    let id = req.params.id
+    // Get database
+    let fakeDatabase = getFakeDatabase()
+    // Filter array by id
+    let filteredData = fakeDatabase.groups.data.filter(
+      (group) => {
+        return Number(group.id) !== Number(id)
+    })
+    // Set new data set
+    fakeDatabase.groups.data = filteredData
+    // Write to database
+    fs.writeFile(
+      path.resolve(__dirname, '../database/data.json'),
+      JSON.stringify(fakeDatabase),
+      err => {
+        if (err) {
+          res.status(500).send('Error writing to database')
+        } else {
+          if (TEST_ERROR) {
+            res.status(404).send('Not Found')
+          } else {
+            res.status(200).send(JSON.stringify({data: { message: "Group deleted" }}))
+          }
+        }
+      }
+    )
+  })
 
   // Delete a report
   app.delete('/rest/reports/:id',

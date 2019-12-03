@@ -23,6 +23,29 @@
       }
     ]
   },
+  "groups": {
+    "data": [
+      {
+        "id": 1,
+        "name": "Utility"
+      },
+
+      {
+        "id": 2,
+        "name": "Transportation"
+      },
+
+      {
+        "id": 3,
+        "name": "IT"
+      },
+
+      {
+        "id": 4,
+        "name": "Security"
+      }
+    ]
+  },
   "datasources": {
     "data": [
       {
