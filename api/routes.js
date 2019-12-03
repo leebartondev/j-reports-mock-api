@@ -111,7 +111,7 @@ module.exports = app => {
    // GET all groups
    app.get('/rest/groups',
    (req, res) => {
-     // Get fake data - datasources
+     // Get fake data - groups
      let fakeDatabase = getFakeDatabase()
      // Send fake data
      if (TEST_ERROR) {
@@ -360,7 +360,7 @@ module.exports = app => {
     // Get database
     let fakeDatabase = getFakeDatabase()
     // Get index of object by id
-    let index = getDatasourceIndexById(fakeDatabase, id)
+    let index = getGroupIndexById(fakeDatabase, id)
     // update object
     fakeDatabase.groups.data[index].name = req.body.name ? req.body.name : fakeDatabase.groups.data[index].name
     // Write to database
