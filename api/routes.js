@@ -134,7 +134,7 @@ module.exports = app => {
       if (fakeDatabase.users.data.length > 0) {
         id = fakeDatabase.users.data[fakeDatabase.users.data.length - 1].id + 1
       }
-      // Create datasource object
+      // Create user object
       let userObject = {
         id: id,
         username: req.body.username,
@@ -196,7 +196,7 @@ module.exports = app => {
       )
   })
 
-  // POST a datasource
+  // POST a group
   app.post('/rest/groups',
     (req, res) => {
       // Get data to add to
@@ -205,13 +205,13 @@ module.exports = app => {
       if (fakeDatabase.groups.data.length > 0) {
         id = fakeDatabase.groups.data[fakeDatabase.groups.data.length - 1].id + 1
       }
-      // Create datasource object
+      // Create group object
       let groupObject = {
         id: id,
         name: req.body.name
       }
-      // Write to mock database
-      fakeDatabase.datasources.data.push(groupObject)
+      // Write to mock group
+      fakeDatabase.groups.data.push(groupObject)
       fs.writeFile(
         path.resolve(__dirname, '../database/data.json'),
         JSON.stringify(fakeDatabase),
