@@ -117,7 +117,7 @@ module.exports = app => {
      if (TEST_ERROR) {
        setTimeout(() => res.status(404).send('Not Found'), 2000)
      } else {
-       setTimeout(() => res.status(200).send(fakeDatabase.users), 1500)
+       setTimeout(() => res.status(200).send(fakeDatabase.groups), 1500)
      }
  })
 
