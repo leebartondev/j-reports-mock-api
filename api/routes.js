@@ -3,6 +3,8 @@ const path = require('path')
 
 const TEST_ERROR = false
 
+const API_URI = '/J_Reports/rest'
+
 const getFakeDatabase = () => {
   return JSON.parse(fs.readFileSync(
     path.resolve(__dirname, '../database/data.json')
@@ -11,8 +13,8 @@ const getFakeDatabase = () => {
 
 const getDatasourceIndexById = (database, id) => {
   // Get index of datasource by id
-  for (let i = 0; i < database.datasources.data.length; i++) {
-    if (Number(database.datasources.data[i].id) === Number(id)) {
+  for (let i = 0; i < database.datasources.length; i++) {
+    if (Number(database.datasources[i].id) === Number(id)) {
       return i
     }
   }
@@ -20,8 +22,8 @@ const getDatasourceIndexById = (database, id) => {
 
 const getReportIndexById = (database, id) => {
   // Get index of report by id
-  for (let i = 0; i < database.reports.data.length; i++) {
-    if (Number(database.reports.data[i].report_id) === Number(id)) {
+  for (let i = 0; i < database.reports.length; i++) {
+    if (Number(database.reports[i].report_id) === Number(id)) {
       return i
     }
   }
@@ -29,8 +31,8 @@ const getReportIndexById = (database, id) => {
 
 const getUserIndexById = (database, id) => {
   // Get index of object by id
-  for (let i = 0; i < database.users.data.length; i++) {
-    if (Number(database.users.data[i].id) === Number(id)) {
+  for (let i = 0; i < database.users.length; i++) {
+    if (Number(database.users[i].id) === Number(id)) {
       return i
     }
   }
@@ -61,7 +63,7 @@ module.exports = app => {
   /// /////////////////
 
   // GET all datasources
-  app.get('/rest/datasources',
+  app.get(`${API_URI}/datasources`,
     (req, res) => {
       // Get fake data - datasources
       let fakeDatabase = getFakeDatabase()
@@ -74,7 +76,7 @@ module.exports = app => {
   })
 
   // GET all reports
-  app.get('/rest/reports',
+  app.get(`${API_URI}/reports`,
     (req, res) => {
       // Get fake data - reports
       let fakeDatabase = getFakeDatabase()
@@ -87,7 +89,7 @@ module.exports = app => {
     })
 
   // GET all users
-  app.get('/rest/users',
+  app.get(`${API_URI}/users`,
     (req, res) => {
       // Get fake data - datasources
       let fakeDatabase = getFakeDatabase()
@@ -104,14 +106,43 @@ module.exports = app => {
   // P O S T
   /// /////////////////
 
+  // POST user login
+  app.post(`${API_URI}/users/login`,
+    (req, res) => {
+      // Check existing users
+      let authUser = null
+      let fakeDatabase = getFakeDatabase()
+      let users = fakeDatabase.users
+      for (const user of users) {
+        if (user.username === req.body.username) {
+          authUser = {
+            id: user.id,
+            user_type_id: user.user_type_id
+          }
+          break
+        }
+      }
+
+      if (authUser) {
+        // Send fake data
+        if (TEST_ERROR) {
+          setTimeout(() => res.status(404).send('Not Found'), 2000)
+        } else {
+          setTimeout(() => res.status(200).send(authUser), 1500)
+        }
+      } else {
+        setTimeout(() => res.status(400).send({ message: 'username and/or password is incorrect'}), 2000)
+      }
+    })
+
   // POST a user
-  app.post('/rest/users',
+  app.post(`${API_URI}/users`,
     (req, res) => {
       // Get data to add to
       let fakeDatabase = getFakeDatabase()
       let id = 1
-      if (fakeDatabase.users.data.length > 0) {
-        id = fakeDatabase.users.data[fakeDatabase.users.data.length - 1].id + 1
+      if (fakeDatabase.users.length > 0) {
+        id = fakeDatabase.users[fakeDatabase.users.length - 1].id + 1
       }
       // Create datasource object
       let userObject = {
@@ -121,7 +152,7 @@ module.exports = app => {
         permission: req.body.permission
       }
       // Write to mock database
-      fakeDatabase.users.data.push(userObject)
+      fakeDatabase.users.push(userObject)
       fs.writeFile(
         path.resolve(__dirname, '../database/data.json'),
         JSON.stringify(fakeDatabase),
@@ -132,7 +163,7 @@ module.exports = app => {
             if (TEST_ERROR) {
               res.status(404).send('Not Found')
             } else {
-              res.status(200).send(JSON.stringify({data: userObject}))
+              res.status(200).send(JSON.stringify(userObject))
             }
           }
         }
@@ -140,13 +171,13 @@ module.exports = app => {
   })
 
   // POST a datasource
-  app.post('/rest/datasources',
+  app.post(`${API_URI}/datasources`,
     (req, res) => {
       // Get data to add to
       let fakeDatabase = getFakeDatabase()
       let id = 1
-      if (fakeDatabase.datasources.data.length > 0) {
-        id = fakeDatabase.datasources.data[fakeDatabase.datasources.data.length - 1].id + 1
+      if (fakeDatabase.datasources.length > 0) {
+        id = fakeDatabase.datasources[fakeDatabase.datasources.length - 1].id + 1
       }
       // Create datasource object
       let datasourceObject = {
@@ -157,7 +188,7 @@ module.exports = app => {
         password: req.body.password
       }
       // Write to mock database
-      fakeDatabase.datasources.data.push(datasourceObject)
+      fakeDatabase.datasources.push(datasourceObject)
       fs.writeFile(
         path.resolve(__dirname, '../database/data.json'),
         JSON.stringify(fakeDatabase),
@@ -168,7 +199,7 @@ module.exports = app => {
             if (TEST_ERROR) {
               res.status(404).send('Not Found')
             } else {
-              res.status(200).send(JSON.stringify({data: datasourceObject}))
+              res.status(200).send(JSON.stringify(datasourceObject))
             }
           }
         }
@@ -176,7 +207,7 @@ module.exports = app => {
   })
 
   // POST report template
-  app.post('/rest/reports/template',
+  app.post(`${API_URI}/reports/template`,
   (req, res) => {
     let datasourceData = getDatasourceData(req.body)
     // Get fake data - run query
@@ -188,10 +219,16 @@ module.exports = app => {
   })
 
   // POST create a report
-  app.post('/rest/reports',
+  app.post(`${API_URI}/reports`,
   (req, res) => {
     let fakeDatabase = getFakeDatabase()
-    let id = (fakeDatabase.reports.data.length > 0) ? fakeDatabase.reports.data[fakeDatabase.reports.data.length - 1].report_id + 1 : 1
+    let id = (fakeDatabase.reports.length > 0) ? fakeDatabase.reports[fakeDatabase.reports.length - 1].report_id + 1 : 1
+    let copyMD = [...req.body.resultMD.columnMetadata]
+    copyMD.forEach((col, i) => {
+      if (col.colAlias === null) {
+        col.colAlias = 'null'
+      }
+    })
     // Create datasource object
     let reportObject = {
       report_id: id,
@@ -199,9 +236,11 @@ module.exports = app => {
       query_string: req.body.query_string,
       report_title: req.body.report_title,
       report_desc: req.body.report_desc,
-      resultMD: req.body.resultMD
+      resultMD: {
+        columnMetadata: copyMD
+      }
     }
-    fakeDatabase.reports.data.push(reportObject)
+    fakeDatabase.reports.push(reportObject)
     fs.writeFile(
       path.resolve(__dirname, '../database/data.json'),
       JSON.stringify(fakeDatabase),
@@ -212,7 +251,7 @@ module.exports = app => {
           if (TEST_ERROR) {
             res.status(404).send('Not Found')
           } else {
-            res.status(200).send(JSON.stringify({data: reportObject}))
+            res.status(200).send(JSON.stringify(reportObject))
           }
         }
       }
@@ -220,7 +259,7 @@ module.exports = app => {
   })
 
   // POST run a report
-  app.post('/rest/reports/run',
+  app.post(`${API_URI}/reports/run`,
   (req, res) => {
     let datasourceData = getDatasourceData(req.body)
     // Get fake data - run query
@@ -236,7 +275,7 @@ module.exports = app => {
   /// /////////////////
 
   // Update a user
-  app.put('/rest/users/:id',
+  app.put(`${API_URI}/users/:id`,
     (req, res) => {
       // Get param
       let id = req.params.id
@@ -245,9 +284,9 @@ module.exports = app => {
       // Get index of object by id
       let index = getUserIndexById(fakeDatabase, id)
       // update object
-      fakeDatabase.users.data[index].username = req.body.username ? req.body.username : fakeDatabase.users.data[index].username
-      fakeDatabase.users.data[index].groups = req.body.groups ? req.body.groups : fakeDatabase.users.data[index].groups
-      fakeDatabase.users.data[index].permission = req.body.permission ? req.body.permission : fakeDatabase.users.data[index].permission
+      fakeDatabase.users[index].username = req.body.username ? req.body.username : fakeDatabase.users[index].username
+      fakeDatabase.users[index].groups = req.body.groups ? req.body.groups : fakeDatabase.users[index].groups
+      fakeDatabase.users[index].user_type_id = (req.body.user_type_id >= 0) ? req.body.user_type_id : fakeDatabase.users[index].user_type_id
       // Write to database
       fs.writeFile(
         path.resolve(__dirname, '../database/data.json'),
@@ -259,7 +298,7 @@ module.exports = app => {
             if (TEST_ERROR) {
               res.status(404).send('Not Found')
             } else {
-              res.status(200).send(JSON.stringify({data: fakeDatabase.users.data[index]}))
+              res.status(200).send(JSON.stringify(fakeDatabase.users[index]))
             }
           }
         }
@@ -267,7 +306,7 @@ module.exports = app => {
     })
 
   // Update a datasource
-  app.put('/rest/datasources/:id',
+  app.put(`${API_URI}/datasources/:id`,
     (req, res) => {
       // Get param
       let id = req.params.id
@@ -276,10 +315,10 @@ module.exports = app => {
       // Get index of object by id
       let index = getDatasourceIndexById(fakeDatabase, id)
       // update object
-      fakeDatabase.datasources.data[index].name = req.body.name ? req.body.name : fakeDatabase.datasources.data[index].name
-      fakeDatabase.datasources.data[index].connection_string = req.body.connection_string ? req.body.connection_string : fakeDatabase.datasources.data[index].connection_string
-      fakeDatabase.datasources.data[index].username = req.body.username ? req.body.username : fakeDatabase.datasources.data[index].username
-      fakeDatabase.datasources.data[index].password = req.body.password ? req.body.password : fakeDatabase.datasources.data[index].password
+      fakeDatabase.datasources[index].name = req.body.name ? req.body.name : fakeDatabase.datasources[index].name
+      fakeDatabase.datasources[index].connection_string = req.body.connection_string ? req.body.connection_string : fakeDatabase.datasources[index].connection_string
+      fakeDatabase.datasources[index].username = req.body.username ? req.body.username : fakeDatabase.datasources[index].username
+      fakeDatabase.datasources[index].password = req.body.password ? req.body.password : fakeDatabase.datasources[index].password
       // Write to database
       fs.writeFile(
         path.resolve(__dirname, '../database/data.json'),
@@ -291,7 +330,7 @@ module.exports = app => {
             if (TEST_ERROR) {
               res.status(404).send('Not Found')
             } else {
-              res.status(200).send(JSON.stringify({data: fakeDatabase.datasources.data[index]}))
+              res.status(200).send(JSON.stringify(fakeDatabase.datasources[index]))
             }
           }
         }
@@ -299,7 +338,7 @@ module.exports = app => {
     })
 
   // Update a report
-  app.put('/rest/reports/:id',
+  app.put(`${API_URI}/reports/:id`,
     (req, res) => {
       // Get param
       let id = req.params.id
@@ -308,8 +347,8 @@ module.exports = app => {
       // Get index of report by id
       let index = getReportIndexById(fakeDatabase, id)
       // Update object
-      fakeDatabase.reports.data[index].report_title = req.body.report_title ? req.body.report_title : fakeDatabase.reports.data[index].report_title
-      fakeDatabase.reports.data[index].report_desc = req.body.report_desc ? req.body.report_desc : fakeDatabase.reports.data[index].report_desc
+      fakeDatabase.reports[index].report_title = req.body.report_title ? req.body.report_title : fakeDatabase.reports[index].report_title
+      fakeDatabase.reports[index].report_desc = req.body.report_desc ? req.body.report_desc : fakeDatabase.reports[index].report_desc
       // Write to database
       fs.writeFile(
         path.resolve(__dirname, '../database/data.json'),
@@ -321,7 +360,7 @@ module.exports = app => {
             if (TEST_ERROR) {
               res.status(404).send('Not Found')
             } else {
-              res.status(200).send(JSON.stringify({data: fakeDatabase.reports.data[index]}))
+              res.status(200).send(JSON.stringify(fakeDatabase.reports[index]))
             }
           }
         }
@@ -333,7 +372,7 @@ module.exports = app => {
   /// /////////////////
 
   // Delete a user
-  app.delete('/rest/users/:id',
+  app.delete(`${API_URI}/users/:id`,
     (req, res) => {
       // Get param
       let id = req.params.id
@@ -342,12 +381,12 @@ module.exports = app => {
       // Get index of object by id
       let index = getUserIndexById(fakeDatabase, id)
       // Filter array by id
-      let filteredData = fakeDatabase.users.data.filter(
+      let filteredData = fakeDatabase.users.filter(
         (user) => {
           return Number(user.id) !== Number(id)
       })
       // Set new data set
-      fakeDatabase.users.data = filteredData
+      fakeDatabase.users = filteredData
       // Write to database
       fs.writeFile(
         path.resolve(__dirname, '../database/data.json'),
@@ -359,7 +398,7 @@ module.exports = app => {
             if (TEST_ERROR) {
               res.status(404).send('Not Found')
             } else {
-              res.status(200).send(JSON.stringify({data: { message: "User deleted" }}))
+              res.status(200).send(JSON.stringify({ message: "User deleted" }))
             }
           }
         }
@@ -367,19 +406,19 @@ module.exports = app => {
     })
 
   // Delete a datasource
-  app.delete('/rest/datasources/:id',
+  app.delete(`${API_URI}/datasources/:id`,
     (req, res) => {
       // Get param
       let id = req.params.id
       // Get database
       let fakeDatabase = getFakeDatabase()
       // Filter array by id
-      let filteredData = fakeDatabase.datasources.data.filter(
+      let filteredData = fakeDatabase.datasources.filter(
         (datasource) => {
           return Number(datasource.id) !== Number(id)
       })
       // Set new data set
-      fakeDatabase.datasources.data = filteredData
+      fakeDatabase.datasources = filteredData
       // Write to database
       fs.writeFile(
         path.resolve(__dirname, '../database/data.json'),
@@ -391,7 +430,7 @@ module.exports = app => {
             if (TEST_ERROR) {
               res.status(404).send('Not Found')
             } else {
-              res.status(200).send(JSON.stringify({data: { message: "Datasource deleted" }}))
+              res.status(200).send(JSON.stringify({message: "Datasource deleted"}))
             }
           }
         }
@@ -399,20 +438,20 @@ module.exports = app => {
     })
 
   // Delete a report
-  app.delete('/rest/reports/:id',
+  app.delete(`${API_URI}/reports/:id`,
     (req, res) => {
       // Get param
       let id = req.params.id
       // Get database
       let fakeDatabase = getFakeDatabase()
       // Filter array by id
-      let filteredData = fakeDatabase.reports.data.filter(
+      let filteredData = fakeDatabase.reports.filter(
         (report) => {
           return Number(report.report_id) !== Number(id)
         }
       )
       // Set new data set
-      fakeDatabase.reports.data = filteredData
+      fakeDatabase.reports = filteredData
       // Write to database
       fs.writeFile(
         path.resolve(__dirname, '../database/data.json'),
@@ -424,7 +463,7 @@ module.exports = app => {
             if (TEST_ERROR) {
               res.status(404).send('Not Found')
             } else {
-              res.status(200).send(JSON.stringify({data: { message: "Datasource deleted" }}))
+              res.status(200).send(JSON.stringify({message: "Datasource deleted" }))
             }
           }
         }
