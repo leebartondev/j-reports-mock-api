@@ -1,1 +1,208 @@
-{"users":[{"id":1,"username":"lGarc","groups":[],"user_type_id":1},{"id":2,"username":"dAutr","groups":[],"user_type_id":0},{"id":3,"username":"rHall","groups":[],"user_type_id":1}],"datasources":[{"id":1,"name":"MySQL","connection_string":"http://localhost:50000000/","username":"myNewUsername","password":"pass123!"},{"id":2,"name":"AccessDB","connection_string":"http://localhost:4000/","username":"lee","password":"4lee0nly!"},{"id":4,"name":"New Datasource","connection_string":"http://localhost:342323/","username":"93203","password":"4Admin0nly!"}],"reports":[{"report_id":1,"datasource_id":2,"query_string":"SELECT * FROM Table WHERE Price < {20;NUM;Price};","report_title":"Title","report_desc":"feoifjef","resultMD":{"columnMetadata":[{"colName":"product_id","colNum":1,"colAlias":"ID"},{"colName":"product_desc","colNum":2,"colAlias":"DESC"},{"colName":"product_cost","colNum":3,"colAlias":"null"}]}},{"report_id":2,"datasource_id":4,"query_string":"SELECT * FROM Table WHERE Price < 20;","report_title":"4g","report_desc":"4g","resultMD":{"columnMetadata":[{"colName":"product_id","colNum":1,"colAlias":"null"},{"colName":"product_desc","colNum":2,"colAlias":"null"},{"colName":"product_cost","colNum":3,"colAlias":"null"}]}}]}
+{
+  "groups": [
+    {
+      "id": 1,
+      "name": "City"
+    },
+    {
+      "id": 2,
+      "name": "IT"
+    },
+    {
+      "id": 3,
+      "name": "PD"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "username": "lGarc",
+      "groups": [
+        {
+          "id": 3,
+          "name": "PD"
+        },
+        {
+          "id": 2,
+          "name": "IT"
+        },
+        {
+          "id": 1,
+          "name": "City"
+        }
+      ],
+      "user_type_id": 1
+    },
+    {
+      "id": 2,
+      "username": "dAutr",
+      "groups": [
+        {
+          "id": 3,
+          "name": "PD"
+        }
+      ],
+      "user_type_id": 0
+    },
+    {
+      "id": 3,
+      "username": "rHall",
+      "groups": [
+        {
+          "id": 1,
+          "name": "City"
+        }
+      ],
+      "user_type_id": 1
+    },
+    {
+      "id": 5,
+      "username": "lee",
+      "groups": [],
+      "user_type_id": 0
+    }
+  ],
+  "datasources": [
+    {
+      "id": 1,
+      "name": "MySQL",
+      "connection_string": "http://localhost:50000000/",
+      "username": "myNewUsername",
+      "password": "pass123!"
+    },
+    {
+      "id": 2,
+      "name": "AccessDB",
+      "connection_string": "http://localhost:4000/",
+      "username": "lee",
+      "password": "4lee0nly!"
+    },
+    {
+      "id": 4,
+      "name": "New Datasource",
+      "connection_string": "http://localhost:342323/",
+      "username": "93203",
+      "password": "4Admin0nly!"
+    }
+  ],
+  "reports": [
+    {
+      "report_id": 1,
+      "datasource_id": 2,
+      "query_string": "SELECT",
+      "report_title": "title",
+      "report_desc": "efiejfef",
+      "resultMD": {
+        "columnMetadata": [
+          {
+            "colName": "product_id",
+            "colNum": 1,
+            "colAlias": "null"
+          },
+          {
+            "colName": "product_desc",
+            "colNum": 2,
+            "colAlias": "null"
+          },
+          {
+            "colName": "product_cost",
+            "colNum": 3,
+            "colAlias": "null"
+          }
+        ]
+      },
+      "groups": [
+        1,
+        2
+      ]
+    },
+    {
+      "report_id": 1,
+      "datasource_id": 2,
+      "query_string": "SELECT",
+      "report_title": "title",
+      "report_desc": "efiejfef",
+      "resultMD": {
+        "columnMetadata": [
+          {
+            "colName": "product_id",
+            "colNum": 1,
+            "colAlias": "null"
+          },
+          {
+            "colName": "product_desc",
+            "colNum": 2,
+            "colAlias": "null"
+          },
+          {
+            "colName": "product_cost",
+            "colNum": 3,
+            "colAlias": "null"
+          }
+        ]
+      },
+      "groups": [
+        1
+      ]
+    },
+    {
+      "report_id": 1,
+      "datasource_id": 2,
+      "query_string": "SELECT",
+      "report_title": "title",
+      "report_desc": "efiejfef",
+      "resultMD": {
+        "columnMetadata": [
+          {
+            "colName": "product_id",
+            "colNum": 1,
+            "colAlias": "null"
+          },
+          {
+            "colName": "product_desc",
+            "colNum": 2,
+            "colAlias": "null"
+          },
+          {
+            "colName": "product_cost",
+            "colNum": 3,
+            "colAlias": "null"
+          }
+        ]
+      },
+      "groups": [
+        1,
+        3
+      ]
+    },
+    {
+      "report_id": 1,
+      "datasource_id": 2,
+      "query_string": "SELECT",
+      "report_title": "title",
+      "report_desc": "efiejfef",
+      "resultMD": {
+        "columnMetadata": [
+          {
+            "colName": "product_id",
+            "colNum": 1,
+            "colAlias": "null"
+          },
+          {
+            "colName": "product_desc",
+            "colNum": 2,
+            "colAlias": "null"
+          },
+          {
+            "colName": "product_cost",
+            "colNum": 3,
+            "colAlias": "null"
+          }
+        ]
+      },
+      "groups": [
+        2
+      ]
+    }
+  ]
+}

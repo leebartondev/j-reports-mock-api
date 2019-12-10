@@ -40,10 +40,31 @@ const getUserIndexById = (database, id) => {
 
 const getGroupIndexById = (database, id) => {
   // Get index of object by id
-  for (let i = 0; i < database.groups.data.length; i++) {
-    if (Number(database.groups.data[i].id) === Number(id)) {
+  for (let i = 0; i < database.groups.length; i++) {
+    if (Number(database.groups[i].id) === Number(id)) {
       return i
     }
+  }
+}
+
+const getReportsByUserId = (database, id) => {
+  // Get all reports that correspond to the user's groups
+  let userReports = []
+  let userIndex = getUserIndexById(database, id)
+  let user = database.users[userIndex]
+  if (user.groups.length) {
+    for (const report of database.reports) {
+      for (const reportGroupId of report.groups) {
+        for (const userGroup of user.groups) {
+          if (Number(userGroup.id) === Number(reportGroupId)) {
+            userReports.push(report)
+          }
+        }
+      }
+    }
+    return userReports
+  } else {
+    return []
   }
 }
 
@@ -97,6 +118,22 @@ module.exports = app => {
       }
     })
 
+  // GET all reports for a user
+  app.get(`${API_URI}/reports/:id`,
+    (req, res) => {
+      // Get param
+      let id = req.params.id
+      // Get fake data - reports
+      let fakeDatabase = getFakeDatabase()
+      let reportsForUser = getReportsByUserId(fakeDatabase, id)
+      // Send fake data
+      if (TEST_ERROR) {
+        setTimeout(() => res.status(404).send('Not Found'), 2000)
+      } else {
+        setTimeout(() => res.status(200).send(reportsForUser), 1500)
+      }
+    })
+
   // GET all users
   app.get(`${API_URI}/users`,
     (req, res) => {
@@ -111,7 +148,7 @@ module.exports = app => {
   })
 
    // GET all groups
-   app.get('/rest/groups',
+   app.get(`${API_URI}/groups`,
    (req, res) => {
      // Get fake data - groups
      let fakeDatabase = getFakeDatabase()
@@ -169,8 +206,8 @@ module.exports = app => {
       let userObject = {
         id: id,
         username: req.body.username,
-        groups: req.body.groups,
-        permission: req.body.permission
+        groups: [],
+        user_type_id: 0
       }
       // Write to mock database
       fakeDatabase.users.push(userObject)
@@ -228,13 +265,13 @@ module.exports = app => {
   })
 
   // POST a group
-  app.post('/rest/groups',
+  app.post(`${API_URI}/groups`,
     (req, res) => {
       // Get data to add to
       let fakeDatabase = getFakeDatabase()
       let id = 1
-      if (fakeDatabase.groups.data.length > 0) {
-        id = fakeDatabase.groups.data[fakeDatabase.groups.data.length - 1].id + 1
+      if (fakeDatabase.groups.length > 0) {
+        id = fakeDatabase.groups[fakeDatabase.groups.length - 1].id + 1
       }
       // Create group object
       let groupObject = {
@@ -242,7 +279,7 @@ module.exports = app => {
         name: req.body.name
       }
       // Write to mock group
-      fakeDatabase.groups.data.push(groupObject)
+      fakeDatabase.groups.push(groupObject)
       fs.writeFile(
         path.resolve(__dirname, '../database/data.json'),
         JSON.stringify(fakeDatabase),
@@ -253,7 +290,7 @@ module.exports = app => {
             if (TEST_ERROR) {
               res.status(404).send('Not Found')
             } else {
-              res.status(200).send(JSON.stringify({data: groupObject}))
+              res.status(200).send(JSON.stringify(groupObject))
             }
           }
         }
@@ -283,6 +320,7 @@ module.exports = app => {
         col.colAlias = 'null'
       }
     })
+    console.log(req.body.groups)
     // Create datasource object
     let reportObject = {
       report_id: id,
@@ -292,7 +330,8 @@ module.exports = app => {
       report_desc: req.body.report_desc,
       resultMD: {
         columnMetadata: copyMD
-      }
+      },
+      groups: req.body.groups
     }
     fakeDatabase.reports.push(reportObject)
     fs.writeFile(
@@ -392,7 +431,7 @@ module.exports = app => {
     })
 
     // Update a group
-  app.put('/rest/groups/:id',
+  app.put(`${API_URI}/groups/:id`,
   (req, res) => {
     // Get param
     let id = req.params.id
@@ -401,7 +440,7 @@ module.exports = app => {
     // Get index of object by id
     let index = getGroupIndexById(fakeDatabase, id)
     // update object
-    fakeDatabase.groups.data[index].name = req.body.name ? req.body.name : fakeDatabase.groups.data[index].name
+    fakeDatabase.groups[index].name = req.body.name ? req.body.name : fakeDatabase.groups[index].name
     // Write to database
     fs.writeFile(
       path.resolve(__dirname, '../database/data.json'),
@@ -413,7 +452,7 @@ module.exports = app => {
           if (TEST_ERROR) {
             res.status(404).send('Not Found')
           } else {
-            res.status(200).send(JSON.stringify({data: fakeDatabase.groups.data[index]}))
+            res.status(200).send(JSON.stringify(fakeDatabase.groups[index]))
           }
         }
       }
@@ -521,19 +560,19 @@ module.exports = app => {
     })
 
   // Delete a group
-  app.delete('/rest/groups/:id',
+  app.delete(`${API_URI}/groups/:id`,
   (req, res) => {
     // Get param
     let id = req.params.id
     // Get database
     let fakeDatabase = getFakeDatabase()
     // Filter array by id
-    let filteredData = fakeDatabase.groups.data.filter(
+    let filteredData = fakeDatabase.groups.filter(
       (group) => {
         return Number(group.id) !== Number(id)
     })
     // Set new data set
-    fakeDatabase.groups.data = filteredData
+    fakeDatabase.groups = filteredData
     // Write to database
     fs.writeFile(
       path.resolve(__dirname, '../database/data.json'),
@@ -545,7 +584,7 @@ module.exports = app => {
           if (TEST_ERROR) {
             res.status(404).send('Not Found')
           } else {
-            res.status(200).send(JSON.stringify({data: { message: "Group deleted" }}))
+            res.status(200).send(JSON.stringify({ message: "Group deleted" }))
           }
         }
       }
